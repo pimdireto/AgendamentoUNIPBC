@@ -1,28 +1,27 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Agenda UNIP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="styles/styles.css" />
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>UNIP</h1>
-      <p>Polo Benjamin Constant</p>
-    </div>
+    <img src="src/logo.png" alt="Logo UNIP" class="logo" />
+    <h1>POLO BENJAMIN CONSTANT</h1>
 
-    <button class="menu-button">Meus Dados</button>
-    <button class="menu-button">Minhas Disciplinas</button>
+    <button class="btn"><i class="fas fa-user"></i> Meus Dados</button>
+    <button class="btn"><i class="fas fa-book"></i> Minhas Disciplinas</button>
 
-    <!-- Redireciona para o app de agendamento de provas -->
-    <a class="menu-button" href="https://pimdireto.github.io/agendamento-provas/" target="_blank">
-      Agendamento de Provas
+    <!-- Link com estilo de botão e abertura em nova aba -->
+    <a href="https://pimdireto.github.io/agendamento-provas/" class="btn" target="_blank">
+      <i class="fas fa-calendar-check"></i> Agendamento de Provas
     </a>
 
-    <button class="menu-button">Calcular Média</button>
-    <button class="menu-button yellow">Checklist</button>
+    <button class="btn"><i class="fas fa-calculator"></i> Calcular Média</button>
+    <button class="btn"><i class="fas fa-list-check"></i> Checklist</button>
   </div>
 </body>
 </html>
