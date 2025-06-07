@@ -1,7 +1,8 @@
+// script.js
+
 console.log("JS carregado com sucesso!");
 
 let count = 0;
-let horariosLotados = [];
 
 function adicionarDisciplina() {
   count++;
@@ -29,11 +30,7 @@ function gerarOpcoesHorarios() {
     "23/06 Segunda-feira - Manhã", "23/06 Segunda-feira - Tarde", "23/06 Segunda-feira - Noite",
     "24/06 Terça-feira - Manhã", "24/06 Terça-feira - Tarde", "24/06 Terça-feira - Noite"
   ];
-
-  return horarios.map(h => {
-    const isLotado = horariosLotados.includes(h);
-    return `<div class="schedule-option ${isLotado ? "lotado" : ""}" onclick="selecionarHorario(this)">${h}</div>`;
-  }).join("");
+  return horarios.map(h => `<div class="schedule-option" onclick="selecionarHorario(this)">${h}</div>`).join("");
 }
 
 function toggleGrade(btn) {
@@ -42,11 +39,6 @@ function toggleGrade(btn) {
 }
 
 function selecionarHorario(el) {
-  if (el.classList.contains("lotado")) {
-    alert("Este horário está com todas as vagas preenchidas. Por favor, selecione outro horário.");
-    return;
-  }
-
   const siblings = el.parentElement.querySelectorAll(".schedule-option");
   siblings.forEach(sib => sib.classList.remove("selected"));
   el.classList.add("selected");
@@ -57,46 +49,17 @@ function selecionarHorario(el) {
   toggleGrade(btnHorario);
 }
 
-function carregarHorariosLotados() {
-  const URL_API = "https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec";
-
-  fetch(URL_API)
-    .then(res => res.json())
-    .then(data => {
-      console.log("Dados recebidos da API (horarios):", data.horarios);
-
-      // Verifica se a resposta está no formato esperado
-      if (!data || typeof data.horarios !== 'object') {
-        console.error("Formato de dados inesperado:", data);
-        return;
-      }
-
-      // Ajuste para considerar horário lotado o que tiver 1 ou mais agendamentos
-      const lotados = [];
-      for (const [horario, total] of Object.entries(data.horarios)) {
-        if (total >= 1) {  // limite ajustado para 1 (apenas 1 aluno permitido)
-          lotados.push(horario);
-        }
-      }
-      horariosLotados = lotados;
-      console.log("Horários lotados atualizados:", horariosLotados);
-
-      // Atualiza as opções de horários nas disciplinas já criadas
-      document.querySelectorAll(".discipline").forEach(d => {
-        const grid = d.querySelector(".schedule-grid");
-        if (grid) {
-          grid.innerHTML = gerarOpcoesHorarios();
-        }
-      });
-    })
-    .catch(err => {
-      console.error("Erro ao carregar horários lotados:", err);
-    });
+function exibirErroAgendamento(mensagem) {
+  const popup = document.getElementById("resumoPopup");
+  popup.querySelector("h3").textContent = "Horário Indisponível";
+  document.getElementById("resumoConteudo").innerHTML = `
+    <div class="erro-popup">
+      <p>⛔ ${mensagem}</p>
+    </div>
+  `;
+  document.getElementById("overlay").style.display = "block";
+  popup.style.display = "block";
 }
-
-window.onload = () => {
-  carregarHorariosLotados();
-};
 
 function enviarFormulario() {
   const nome = document.getElementById("nome").value.trim();
@@ -118,13 +81,11 @@ function enviarFormulario() {
     });
   }
 
-  // Exibe o indicador de carregamento
   document.getElementById("loadingOverlay").style.display = "flex";
   let progress = 0;
   const progressBar = document.getElementById("progress");
   const loadingPercentage = document.getElementById("loadingPercentage");
 
-  // Simula o carregamento
   const interval = setInterval(() => {
     if (progress < 90) {
       progress += 10;
@@ -133,13 +94,12 @@ function enviarFormulario() {
     }
   }, 100);
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbz_SiAQURO5ueYyJL0QJhIWmd4-FJiKTHNcIejq0PK22Q3sz9QWMAKMCPg34M7SCwphgg/exec";
 
-  // Primeiro, verifica se o RA já tem agendamento
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
     .then(data => {
-      if (data && data.nome) {
+      if (data && data.ra && data.nome) {
         clearInterval(interval);
         document.getElementById("loadingOverlay").style.display = "none";
 
@@ -152,16 +112,15 @@ function enviarFormulario() {
             </div>
           </div>
         `;
-
         document.getElementById("resumoConteudo").innerHTML = msg;
         document.getElementById("overlay").style.display = "block";
         document.getElementById("resumoPopup").style.display = "block";
         return;
       }
 
-      // Se não encontrou, envia o agendamento normalmente
-      fetch("https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec", {
+      fetch(URL_API, {
         method: "POST",
+        mode: "no-cors",
         headers: {
           "Content-Type": "application/json"
         },
@@ -178,12 +137,9 @@ function enviarFormulario() {
         progressBar.style.width = progress + "%";
         loadingPercentage.textContent = progress + "%";
 
-        // Exibe o resumo após um pequeno atraso
         setTimeout(() => {
-          // Oculta o indicador de carregamento
           document.getElementById("loadingOverlay").style.display = "none";
 
-          // Exibe o resumo
           let resumo = `
             <p><strong>Nome:</strong> ${nome}</p>
             <p><strong>RA:</strong> ${ra}</p>
@@ -199,11 +155,11 @@ function enviarFormulario() {
           document.getElementById("resumoConteudo").innerHTML = resumo;
           document.getElementById("overlay").style.display = "block";
           document.getElementById("resumoPopup").style.display = "block";
-        }, 500); // Atraso de 500ms para simular o tempo de processamento
+        }, 500);
       });
     })
     .catch(error => {
-      clearInterval(interval); // Para a simulação de carregamento
+      clearInterval(interval);
       document.getElementById("loadingOverlay").style.display = "none";
       alert("Erro ao verificar RA: " + error.message);
     });
@@ -212,7 +168,6 @@ function enviarFormulario() {
 function fecharResumo() {
   document.getElementById("resumoPopup").style.display = "none";
   document.getElementById("overlay").style.display = "none";
-  // Atualiza a página para permitir um novo agendamento
   location.reload();
 }
 
@@ -228,28 +183,23 @@ function fecharConsulta() {
 
 function consultarAgendamento() {
   const ra = document.getElementById("raConsulta").value.trim();
-
   if (ra === "") {
     alert("Por favor, digite o RA.");
     return;
   }
 
-  // Mostra o carregamento opcional
   document.getElementById("loadingOverlay").style.display = "flex";
-
-  const URL_API = "https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbz_SiAQURO5ueYyJL0QJhIWmd4-FJiKTHNcIejq0PK22Q3sz9QWMAKMCPg34M7SCwphgg/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
     .then(data => {
       document.getElementById("loadingOverlay").style.display = "none";
-
       if (!data || !data.nome) {
         alert("Agendamento não encontrado.");
         return;
       }
 
-      // Reutiliza o mesmo popup de confirmação
       let resumo = `
         <p><strong>Nome:</strong> ${data.nome}</p>
         <p><strong>RA:</strong> ${data.ra}</p>
@@ -290,5 +240,22 @@ function mostrarResumoConsulta(dados) {
 }
 
 function fecharResumoConsulta() {
-  document.getElementById('resumoConsulta').style.display = 'block';
+  document.getElementById('resumoConsulta').style.display = 'none';
 }
+
+let horariosLotados = {};
+
+async function carregarHorariosLotados() {
+  try {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbz_SiAQURO5ueYyJL0QJhIWmd4-FJiKTHNcIejq0PK22Q3sz9QWMAKMCPg34M7SCwphgg/exec");
+    const data = await response.json();
+    horariosLotados = data;
+  } catch (error) {
+    console.error("Erro ao carregar contagem de horários:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await carregarHorariosLotados();
+  // Se houver função para criar grade, chame aqui
+});

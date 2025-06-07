@@ -334,14 +334,9 @@ button[onclick="fecharConsulta()"] {
   text-transform: uppercase;
 }
 
-
-
-
-.schedule-option.lotado {
-  background-color: #f44336;
+.lotado {
+  background-color: #ff4d4d !important;
   color: white;
   cursor: not-allowed;
-}
-.schedule-option.lotado:hover {
-  background-color: #d32f2f;
+  border-color: #d60000;
 }
