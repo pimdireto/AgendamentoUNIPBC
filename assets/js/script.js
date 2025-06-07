@@ -1,6 +1,7 @@
 console.log("JS carregado com sucesso!");
 
 let count = 0;
+let horariosLotados = [];
 
 function adicionarDisciplina() {
   count++;
@@ -28,7 +29,11 @@ function gerarOpcoesHorarios() {
     "23/06 Segunda-feira - Manhã", "23/06 Segunda-feira - Tarde", "23/06 Segunda-feira - Noite",
     "24/06 Terça-feira - Manhã", "24/06 Terça-feira - Tarde", "24/06 Terça-feira - Noite"
   ];
-  return horarios.map(h => `<div class="schedule-option" onclick="selecionarHorario(this)">${h}</div>`).join("");
+
+  return horarios.map(h => {
+    const isLotado = horariosLotados.includes(h);
+    return `<div class="schedule-option ${isLotado ? "lotado" : ""}" onclick="selecionarHorario(this)">${h}</div>`;
+  }).join("");
 }
 
 function toggleGrade(btn) {
@@ -37,17 +42,61 @@ function toggleGrade(btn) {
 }
 
 function selecionarHorario(el) {
+  if (el.classList.contains("lotado")) {
+    alert("Este horário está com todas as vagas preenchidas. Por favor, selecione outro horário.");
+    return;
+  }
+
   const siblings = el.parentElement.querySelectorAll(".schedule-option");
   siblings.forEach(sib => sib.classList.remove("selected"));
   el.classList.add("selected");
-  
-  // Atualiza o texto do botão para mostrar o horário selecionado
+
   const btnHorario = el.parentElement.previousElementSibling;
   btnHorario.textContent = "Horário: " + el.textContent;
-  
-  // Recolhe a grade de horários após a seleção
+
   toggleGrade(btnHorario);
 }
+
+function carregarHorariosLotados() {
+  const URL_API = "https://script.google.com/macros/s/AKfycbzI1pnNFAz-_28ZTSxf-9OwU9d_eaJrZUTMCFGSjzjbtyxs-G0fSm4T2HFkPpaLFehqxg/exec";
+
+  fetch(URL_API)
+    .then(res => res.json())
+    .then(data => {
+      console.log("Dados recebidos da API (horarios):", data.horarios);
+
+      // Verifica se a resposta está no formato esperado
+      if (!data || typeof data.horarios !== 'object') {
+        console.error("Formato de dados inesperado:", data);
+        return;
+      }
+
+      // Ajuste para considerar horário lotado o que tiver 1 ou mais agendamentos
+      const lotados = [];
+      for (const [horario, total] of Object.entries(data.horarios)) {
+        if (total >= 1) {  // limite ajustado para 1 (apenas 1 aluno permitido)
+          lotados.push(horario);
+        }
+      }
+      horariosLotados = lotados;
+      console.log("Horários lotados atualizados:", horariosLotados);
+
+      // Atualiza as opções de horários nas disciplinas já criadas
+      document.querySelectorAll(".discipline").forEach(d => {
+        const grid = d.querySelector(".schedule-grid");
+        if (grid) {
+          grid.innerHTML = gerarOpcoesHorarios();
+        }
+      });
+    })
+    .catch(err => {
+      console.error("Erro ao carregar horários lotados:", err);
+    });
+}
+
+window.onload = () => {
+  carregarHorariosLotados();
+};
 
 function enviarFormulario() {
   const nome = document.getElementById("nome").value.trim();
@@ -84,36 +133,35 @@ function enviarFormulario() {
     }
   }, 100);
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbyXa3eSqGN4g8wK905GrHipikMszWAx-jNHciNMVyM0BkBu7BpK5eqSn6s2Yy65GcWpXw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbzI1pnNFAz-_28ZTSxf-9OwU9d_eaJrZUTMCFGSjzjbtyxs-G0fSm4T2HFkPpaLFehqxg/exec";
 
   // Primeiro, verifica se o RA já tem agendamento
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
     .then(data => {
       if (data && data.nome) {
-  clearInterval(interval);
-  document.getElementById("loadingOverlay").style.display = "none";
+        clearInterval(interval);
+        document.getElementById("loadingOverlay").style.display = "none";
 
-  const msg = `
-    <div class="popup-alert">
-      <i>⚠️</i>
-      <div>
-        <p>Este RA <strong>${ra}</strong> já possui um agendamento registrado.</p>
-        <p>Por favor, utilize a opção <strong>CONSULTAR AGENDAMENTO</strong>.</p>
-      </div>
-    </div>
-  `;
+        const msg = `
+          <div class="popup-alert">
+            <i>⚠️</i>
+            <div>
+              <p>Este RA <strong>${ra}</strong> já possui um agendamento registrado.</p>
+              <p>Por favor, utilize a opção <strong>CONSULTAR AGENDAMENTO</strong>.</p>
+            </div>
+          </div>
+        `;
 
-  document.getElementById("resumoConteudo").innerHTML = msg;
-  document.getElementById("overlay").style.display = "block";
-  document.getElementById("resumoPopup").style.display = "block";
-  return;
-}
+        document.getElementById("resumoConteudo").innerHTML = msg;
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("resumoPopup").style.display = "block";
+        return;
+      }
 
-// Se não encontrou, envia o agendamento normalmente
+      // Se não encontrou, envia o agendamento normalmente
       fetch(URL_API, {
         method: "POST",
-        mode: "no-cors",
         headers: {
           "Content-Type": "application/json"
         },
@@ -161,7 +209,6 @@ function enviarFormulario() {
     });
 }
 
-
 function fecharResumo() {
   document.getElementById("resumoPopup").style.display = "none";
   document.getElementById("overlay").style.display = "none";
@@ -190,7 +237,7 @@ function consultarAgendamento() {
   // Mostra o carregamento opcional
   document.getElementById("loadingOverlay").style.display = "flex";
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbyXa3eSqGN4g8wK905GrHipikMszWAx-jNHciNMVyM0BkBu7BpK5eqSn6s2Yy65GcWpXw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbzI1pnNFAz-_28ZTSxf-9OwU9d_eaJrZUTMCFGSjzjbtyxs-G0fSm4T2HFkPpaLFehqxg/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
@@ -245,4 +292,3 @@ function mostrarResumoConsulta(dados) {
 function fecharResumoConsulta() {
   document.getElementById('resumoConsulta').style.display = 'none';
 }
-
