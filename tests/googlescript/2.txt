@@ -1,0 +1,72 @@
+function doPost(e) { 
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetPrincipal = ss.getSheetByName("Página1");
+
+  const dados = JSON.parse(e.postData.contents);
+  const dataEnvio = new Date();
+
+  dados.agendamentos.forEach(agendamento => {
+    // Inserir na planilha principal
+    sheetPrincipal.appendRow([
+      dados.nome,
+      dados.ra,
+      dados.curso,
+      Utilities.formatDate(dataEnvio, "GMT-3", "dd/MM/yyyy, HH:mm:ss"),
+      agendamento.disciplina,
+      agendamento.horario
+    ]);
+
+    const nomeAba = agendamento.horario;
+    let abaHorario = ss.getSheetByName(nomeAba);
+
+    if (!abaHorario) {
+      const abas = ss.getSheets().filter(s => s.getName() !== "Página1");
+      const novaChave = gerarChaveOrdenacao(nomeAba);
+
+      let posicao = abas.length + 1;
+      for (let i = 0; i < abas.length; i++) {
+        const chaveExistente = gerarChaveOrdenacao(abas[i].getName());
+        if (compararChaves(novaChave, chaveExistente) < 0) {
+          posicao = i + 2;
+          break;
+        }
+      }
+
+      abaHorario = ss.insertSheet(nomeAba, posicao - 1);
+      abaHorario.appendRow(["NOME COMPLETO", "RA", "CURSO", "DISCIPLINA"]);
+    }
+
+    abaHorario.appendRow([
+      dados.nome,
+      dados.ra,
+      dados.curso,
+      agendamento.disciplina
+    ]);
+  });
+
+  return ContentService.createTextOutput("OK");
+}
+
+// Gera uma "chave" para ordenação: [Date, período]
+function gerarChaveOrdenacao(nomeAba) {
+  const partes = nomeAba.split(" ");
+  const [dia, mes] = partes[0].split("/").map(Number);
+  const periodoTexto = partes[partes.length - 1].toLowerCase(); // último termo: manhã/tarde/noite
+  const ano = new Date().getFullYear();
+
+  const data = new Date(ano, mes - 1, dia);
+  const pesoPeriodo = {
+    "manhã": 1,
+    "tarde": 2,
+    "noite": 3
+  }[periodoTexto] || 99;
+
+  return { data, periodo: pesoPeriodo };
+}
+
+// Função para comparar duas chaves
+function compararChaves(a, b) {
+  if (a.data.getTime() < b.data.getTime()) return -1;
+  if (a.data.getTime() > b.data.getTime()) return 1;
+  return a.periodo - b.periodo;
+}

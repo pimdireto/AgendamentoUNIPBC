@@ -1,0 +1,154 @@
+function doPost(e) { 
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetPrincipal = ss.getSheetByName("Página1");
+
+  const dados = JSON.parse(e.postData.contents);
+  const dataEnvio = new Date();
+
+  dados.agendamentos.forEach(agendamento => {
+    // Inserir na planilha principal (linha nova normal)
+    sheetPrincipal.appendRow([
+      dados.nome,
+      dados.ra,
+      dados.curso,
+      Utilities.formatDate(dataEnvio, "GMT-3", "dd/MM/yyyy, HH:mm:ss"),
+      agendamento.disciplina,
+      agendamento.horario
+    ]);
+
+    // Criar aba se necessário
+    const nomeAba = agendamento.horario;
+    let abaHorario = ss.getSheetByName(nomeAba);
+
+    if (!abaHorario) {
+      abaHorario = ss.insertSheet(nomeAba);
+      // Começa com cabeçalho em B1:E1
+      abaHorario.getRange("B1:E1").setValues([["NOME COMPLETO", "RA", "CURSO", "DISCIPLINA"]]);
+    }
+
+    // Encontrar a próxima linha vazia na coluna B (segunda coluna)
+    const ultimaLinha = abaHorario.getLastRow();
+    const proximaLinha = ultimaLinha < 1 ? 2 : ultimaLinha + 1;
+
+    // Inserir os dados a partir da célula B2
+    abaHorario.getRange(proximaLinha, 2, 1, 4).setValues([[
+      dados.nome,
+      dados.ra,
+      dados.curso,
+      agendamento.disciplina
+    ]]);
+  });
+
+  reordenarAbas(); // Agora sempre reorganiza após cada envio
+
+  return ContentService.createTextOutput("OK");
+}
+
+// Reorganiza todas as abas após a aba principal
+function reordenarAbas() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const todasAbas = ss.getSheets();
+
+  const abaPrincipal = ss.getSheetByName("Página1");
+  const abasOrdenadas = todasAbas
+    .filter(s => s.getName() !== "Página1")
+    .map(sheet => ({
+      nome: sheet.getName(),
+      chave: gerarChaveOrdenacao(sheet.getName()),
+      sheet
+    }))
+    .sort((a, b) => compararChaves(a.chave, b.chave))
+    .map(obj => obj.sheet);
+
+  // Mover Página1 para a primeira posição
+  ss.setActiveSheet(abaPrincipal);
+  ss.moveActiveSheet(0);
+
+  // Reordenar as demais abas
+  abasOrdenadas.forEach((sheet, i) => {
+    ss.setActiveSheet(sheet);
+    ss.moveActiveSheet(i + 1); // após Página1
+  });
+}
+
+// Constrói chave com data e peso do período
+function gerarChaveOrdenacao(nomeAba) {
+  try {
+    const partes = nomeAba.split(" ");
+    const [dia, mes] = partes[0].split("/").map(Number);
+    const periodoTexto = partes[partes.length - 1].toLowerCase();
+    const ano = new Date().getFullYear();
+
+    const data = new Date(ano, mes - 1, dia);
+    const pesoPeriodo = {
+      "manhã": 1,
+      "tarde": 2,
+      "noite": 3
+    }[periodoTexto] || 99;
+
+    return { data, periodo: pesoPeriodo };
+  } catch (err) {
+    return { data: new Date(9999, 11, 31), periodo: 99 }; // fallback
+  }
+}
+
+// Compara duas chaves de ordenação
+function compararChaves(a, b) {
+  if (a.data < b.data) return -1;
+  if (a.data > b.data) return 1;
+  return a.periodo - b.periodo;
+}
+
+
+
+
+
+
+
+
+
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Página1");
+
+  const ra = e.parameter.ra;
+  if (!ra) {
+    return ContentService.createTextOutput(JSON.stringify({ erro: "RA não fornecido" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  const dados = sheet.getDataRange().getValues();
+  const resultados = [];
+
+  // Percorre a planilha para encontrar os dados do aluno
+  for (let i = 1; i < dados.length; i++) {
+    const linha = dados[i];
+    if (linha[1].toString() === ra) {
+      resultados.push({
+        nome: linha[0],
+        ra: linha[1],
+        curso: linha[2],
+        dataEnvio: linha[3],
+        disciplina: linha[4],
+        horario: linha[5]
+      });
+    }
+  }
+
+  if (resultados.length === 0) {
+    return ContentService.createTextOutput(JSON.stringify({ erro: "RA não encontrado" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ agendamentos: resultados })).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+
+
+
+
+
+
+
+
+
+

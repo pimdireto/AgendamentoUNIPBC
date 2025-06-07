@@ -1,0 +1,181 @@
+function doPost(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheetPrincipal = ss.getSheetByName("Página1");
+  const dados = JSON.parse(e.postData.contents);
+  const dataEnvio = new Date();
+
+  dados.agendamentos.forEach(agendamento => {
+    // Insere na planilha principal
+    sheetPrincipal.appendRow([
+      dados.nome,
+      "'" + dados.ra.padStart(7, '0'), // RA com 7 dígitos
+      dados.curso,
+      Utilities.formatDate(dataEnvio, "GMT-3", "dd/MM/yyyy, HH:mm:ss"),
+      agendamento.disciplina,
+      agendamento.horario
+    ]);
+
+    // Cria ou seleciona aba do horário
+    const nomeAba = agendamento.horario;
+    let abaHorario = ss.getSheetByName(nomeAba);
+    if (!abaHorario) {
+      abaHorario = ss.insertSheet(nomeAba);
+      abaHorario.getRange("B1:E1").setValues([["NOME COMPLETO", "RA", "CURSO", "DISCIPLINA"]]);
+    }
+
+    const ultimaLinha = abaHorario.getLastRow();
+    const proximaLinha = ultimaLinha < 1 ? 2 : ultimaLinha + 1;
+
+    abaHorario.getRange(proximaLinha, 2, 1, 4).setValues([[
+      dados.nome,
+      "'" + dados.ra.padStart(7, '0'),
+      dados.curso,
+      agendamento.disciplina
+    ]]);
+  });
+
+  reordenarAbas();
+  return ContentService.createTextOutput("OK");
+}
+
+// Reorganiza abas com base na data e período
+function reordenarAbas() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const todasAbas = ss.getSheets();
+  const abaPrincipal = ss.getSheetByName("Página1");
+
+  const abasOrdenadas = todasAbas
+    .filter(s => s.getName() !== "Página1")
+    .map(sheet => ({
+      nome: sheet.getName(),
+      chave: gerarChaveOrdenacao(sheet.getName()),
+      sheet
+    }))
+    .sort((a, b) => compararChaves(a.chave, b.chave))
+    .map(obj => obj.sheet);
+
+  ss.setActiveSheet(abaPrincipal);
+  ss.moveActiveSheet(0);
+
+  abasOrdenadas.forEach((sheet, i) => {
+    ss.setActiveSheet(sheet);
+    ss.moveActiveSheet(i + 1);
+  });
+}
+
+// Gera chave de ordenação (data e período)
+function gerarChaveOrdenacao(nomeAba) {
+  try {
+    const partes = nomeAba.split(" ");
+    const [dia, mes] = partes[0].split("/").map(Number);
+    const periodoTexto = partes[partes.length - 1].toLowerCase();
+    const ano = new Date().getFullYear();
+
+    const data = new Date(ano, mes - 1, dia);
+    const pesoPeriodo = {
+      "manhã": 1,
+      "tarde": 2,
+      "noite": 3
+    }[periodoTexto] || 99;
+
+    return { data, periodo: pesoPeriodo };
+  } catch (err) {
+    return { data: new Date(9999, 11, 31), periodo: 99 }; // fallback
+  }
+}
+
+// Compara chaves de ordenação
+function compararChaves(a, b) {
+  if (a.data < b.data) return -1;
+  if (a.data > b.data) return 1;
+  return a.periodo - b.periodo;
+}
+
+// Função GET unificada: consulta RA ou contagem
+function doGet(e) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const action = e.parameter.action;
+  const raParam = (e.parameter.ra || "").toString().trim().toLowerCase();
+
+  // 1. Retorna contagem por horário
+  if (action === "contagemHorarios") {
+    return ContentService.createTextOutput(
+      JSON.stringify(getContagemPorHorario())
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 2. Consulta agendamento por RA
+  if (raParam) {
+    const sheet = ss.getSheetByName("Página1");
+    const dados = sheet.getDataRange().getValues();
+    const disciplinas = [];
+
+    let nome = "", curso = "", dataEnvio = "", raEncontrado = false;
+
+    for (let i = 1; i < dados.length; i++) {
+      const raLinha = (dados[i][1] || "").toString().replace(/^'/, "").trim().toLowerCase();
+
+      if (raLinha === raParam) {
+        raEncontrado = true;
+        nome = dados[i][0];
+        curso = dados[i][2];
+
+        const dataBruta = dados[i][3];
+        if (dataBruta instanceof Date) {
+          const fuso = SpreadsheetApp.getActive().getSpreadsheetTimeZone();
+          dataEnvio = Utilities.formatDate(dataBruta, fuso, "dd/MM/yyyy, HH:mm:ss");
+        } else {
+          dataEnvio = dados[i][3];
+        }
+
+        disciplinas.push({
+          nome: dados[i][4],
+          horario: dados[i][5]
+        });
+      }
+    }
+
+    if (!raEncontrado) {
+      return ContentService.createTextOutput(
+        JSON.stringify({ erro: "Agendamento não encontrado." })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const resultado = {
+      nome,
+      ra: e.parameter.ra.trim(),
+      curso,
+      dataEnvio,
+      disciplinas
+    };
+
+    return ContentService.createTextOutput(
+      JSON.stringify(resultado)
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 3. Nenhuma ação válida encontrada
+  return ContentService.createTextOutput(
+    JSON.stringify({ erro: "Parâmetros inválidos." })
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Contagem de agendamentos por horário
+function getContagemPorHorario() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const abaPrincipal = ss.getSheetByName("Página1");
+  const dados = abaPrincipal.getDataRange().getValues();
+
+  const contagem = {}; // { "10/06/2025 - Tarde": 15, ... }
+
+  for (let i = 1; i < dados.length; i++) {
+    const data = dados[i][4];     // disciplina
+    const horario = dados[i][5];  // horário
+    if (data && horario) {
+      const chave = `${data} - ${horario}`;
+      contagem[chave] = (contagem[chave] || 0) + 1;
+    }
+  }
+
+  return contagem;
+}
