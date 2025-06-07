@@ -160,7 +160,7 @@ function enviarFormulario() {
       }
 
       // Se não encontrou, envia o agendamento normalmente
-      fetch(URL_API, {
+      fetch("https://script.google.com/macros/s/AKfycby8ORvubh5DABIV10qNSoNQYhibR9VCZJ6i4RBgXhgowDVISUgQikyn0CpKpJK1K_ywBQ/exec", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
