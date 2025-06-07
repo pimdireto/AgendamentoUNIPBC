@@ -84,7 +84,7 @@ function enviarFormulario() {
     }
   }, 100);
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbwWLYFqeLSo5g8dJKmgbtS52YKkdNx3l8tDR6hYu5Hm95Zps5gJKna-FqPYIkMpaYUnaQ/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbyUCX-hXdXwRL4lJR_5W03LdDH86Vi3DBTmTkZ9rG8xALQZjVaFK-0dcSPzA-hh0B_u3g/exec";
 
   // Primeiro, verifica se o RA já tem agendamento
   fetch(`${URL_API}?ra=${ra}`)
@@ -190,7 +190,7 @@ function consultarAgendamento() {
   // Mostra o carregamento opcional
   document.getElementById("loadingOverlay").style.display = "flex";
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbwWLYFqeLSo5g8dJKmgbtS52YKkdNx3l8tDR6hYu5Hm95Zps5gJKna-FqPYIkMpaYUnaQ/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbyUCX-hXdXwRL4lJR_5W03LdDH86Vi3DBTmTkZ9rG8xALQZjVaFK-0dcSPzA-hh0B_u3g/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
