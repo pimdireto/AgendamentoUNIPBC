@@ -58,7 +58,7 @@ function selecionarHorario(el) {
 }
 
 function carregarHorariosLotados() {
-  const URL_API = "https://script.google.com/macros/s/AKfycbykrd6MUIZIAhS7GD5qZgIPbM4IGQxpQGtMdTci_wQ_VJF4FQDK13MfyNcawKbmd4AZIw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec";
 
   fetch(URL_API)
     .then(res => res.json())
@@ -133,7 +133,7 @@ function enviarFormulario() {
     }
   }, 100);
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbykrd6MUIZIAhS7GD5qZgIPbM4IGQxpQGtMdTci_wQ_VJF4FQDK13MfyNcawKbmd4AZIw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec";
 
   // Primeiro, verifica se o RA já tem agendamento
   fetch(`${URL_API}?ra=${ra}`)
@@ -160,7 +160,7 @@ function enviarFormulario() {
       }
 
       // Se não encontrou, envia o agendamento normalmente
-      fetch("https://script.google.com/macros/s/AKfycbykrd6MUIZIAhS7GD5qZgIPbM4IGQxpQGtMdTci_wQ_VJF4FQDK13MfyNcawKbmd4AZIw/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -237,7 +237,7 @@ function consultarAgendamento() {
   // Mostra o carregamento opcional
   document.getElementById("loadingOverlay").style.display = "flex";
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbykrd6MUIZIAhS7GD5qZgIPbM4IGQxpQGtMdTci_wQ_VJF4FQDK13MfyNcawKbmd4AZIw/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbwYzhtXvIQ2wBXX-h7Soo99Xfn0IQ9sQgkQEevPdZiH3rcZy0hOo-YllSypUXoRByIpMw/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
