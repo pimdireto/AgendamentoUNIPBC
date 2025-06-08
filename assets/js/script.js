@@ -94,7 +94,7 @@ function enviarFormulario() {
     }
   }, 100);
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbyrUxbUKuZrV7OZM3SdtL3UOyLYcIQHf3nMWJ3zcMj3GcWVikuYSqAZa6xweIAGJ0HSNg/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
@@ -189,7 +189,7 @@ function consultarAgendamento() {
   }
 
   document.getElementById("loadingOverlay").style.display = "flex";
-  const URL_API = "https://script.google.com/macros/s/AKfycbyrUxbUKuZrV7OZM3SdtL3UOyLYcIQHf3nMWJ3zcMj3GcWVikuYSqAZa6xweIAGJ0HSNg/exec";
+  const URL_API = "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
     .then(res => res.json())
@@ -247,7 +247,7 @@ let horariosLotados = {};
 
 async function carregarHorariosLotados() {
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbyrUxbUKuZrV7OZM3SdtL3UOyLYcIQHf3nMWJ3zcMj3GcWVikuYSqAZa6xweIAGJ0HSNg/exec");
+    const response = await fetch("https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec");
     const data = await response.json();
     horariosLotados = data;
   } catch (error) {
