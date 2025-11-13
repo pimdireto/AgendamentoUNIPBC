@@ -27,7 +27,7 @@ function gerarOpcoesHorarios() {
     "26/11 Quarta-feira - Manhã", "26/11 Quarta-feira - Tarde", "26/11 Quarta-feira - Noite",
     "27/11 Quinta-feira - Manhã", "27/11 Quinta-feira - Tarde", "27/11 Quinta-feira - Noite",
     "28/11 Sexta-feira - Manhã", "28/11 Sexta-feira - Tarde", "28/11 Sexta-feira - noite",
-    "29/11 Segunda-feira - Manhã", "29/11 Segunda-feira  - Tarde", "29/11 Segunda-feira  - Noite"
+    "29/11 Sábado - Manhã", "29/11 Sábado  - Tarde"
   ];
   return horarios.map(h => `<div class="schedule-option" onclick="selecionarHorario(this)">${h}</div>`).join("");
 }
@@ -258,6 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarHorariosLotados();
   // Se houver função para criar grade, chame aqui
 });
+
 
 
 
