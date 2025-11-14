@@ -6,8 +6,111 @@
   <title>Agendamento de Provas</title>
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
-  
-  <!-- POPUP -->
+
+<body>
+  <div class="container">
+    <div class="header-unip">
+      <img src="assets/img/logo.png" alt="Logo UNIP" class="logo-unip" />
+      <h2>POLO BENJAMIN CONSTANT</h2>
+      <h2>PROVA DO DIA 24 A 29 DE NOVEMBRO</h2>
+    </div>
+
+    <label>Nome Completo*</label>
+    <input type="text" id="nome" placeholder="Digite o Nome Completo" />
+
+    <label>RA*</label>
+    <input
+      type="text"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      id="ra"
+      name="ra"
+      required
+    />
+
+    <label>Curso*</label>
+    <input type="text" id="curso" />
+
+    <div id="disciplinas"></div>
+
+    <button class="btn btn-add" onclick="adicionarDisciplina()">
+      Adicionar Disciplina
+    </button>
+    <button class="btn btn-send" onclick="enviarFormulario()">
+      Enviar
+    </button>
+
+    <hr style="margin-top: 20px;" />
+
+    <!-- Botão de Consultar Agendamento -->
+    <button class="btn" onclick="abrirConsulta()">Consultar Agendamento</button>
+
+    <!-- Popup de Consulta -->
+    <div id="popupConsulta" class="popup hidden">
+      <div class="popup-content">
+        <h3>Consultar Agendamento</h3>
+        <label for="raConsulta">Digite seu RA:</label>
+        <input
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          id="raConsulta"
+          placeholder="Ex: 1234567"
+          required
+        />
+
+        <div class="popup-buttons">
+          <button class="btn" onclick="consultarAgendamento()">Consultar</button>
+          <button class="btn btn-close" onclick="fecharConsulta()">Fechar</button>
+        </div>
+
+        <div id="resultadoConsulta"></div>
+      </div>
+    </div>
+
+    <div class="credits">
+      © 2025 - Desenvolvido por Thiago Nascimento
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="summary-popup" id="resumoPopup">
+    <h3>Agendamento Confirmado</h3>
+    <div id="resumoConteudo"></div>
+    <button
+      class="btn btn-send"
+      style="margin-top: 15px;"
+      onclick="fecharResumo()"
+    >
+      Fechar
+    </button>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div id="resumoConsulta" class="resumo-popup" style="display: none;">
+      <div class="resumo-content">
+        <h2>Agendamento Encontrado</h2>
+        <p><strong>Nome:</strong> <span id="consulta-nome"></span></p>
+        <p><strong>RA:</strong> <span id="consulta-ra"></span></p>
+        <p><strong>Curso:</strong> <span id="consulta-curso"></span></p>
+        <p><strong>Data de envio:</strong> <span id="consulta-data"></span></p>
+        <ul id="consulta-disciplinas"></ul>
+        <button class="btn btn-fechar" onclick="fecharResumoConsulta()">
+          Fechar
+        </button>
+      </div>
+    </div>
+
+    <div class="loading">
+      Enviando...<br /><span id="loadingPercentage">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress" id="progress"></div>
+    </div>
+  </div>
+
+  <!-- POPUP INICIAL REGULAR x SUBSTITUTIVA -->
   <div id="popup-inicial" class="popup-overlay">
     <div class="popup-modal">
       <h2>Tipo de Semana</h2>
@@ -25,108 +128,5 @@
   </div>
 
   <script src="assets/js/script.js"></script>
-
-</html>
-
-  
-  
-<body>
-
-  <div class="container">
-    <div class="header-unip">
-  <img src="assets/img/logo.png" alt="Logo UNIP" class="logo-unip" />
-  <h2>POLO BENJAMIN CONSTANT</h2>
-        <h2>PROVA DO DIA 24 A 29 DE NOVEMBRO</h2>
-
-</div>
-    <label>Nome Completo*</label>
-    <input type="text" id="nome" placeholder="Digite o Nome Completo" />
-    <label>RA*</label>
-    <input type="text" inputmode="numeric" pattern="[0-9]*" id="ra" name="ra" required />
-    <label>Curso*</label>
-    <input type="text" id="curso" />
-    <div id="disciplinas"></div>
-    <button class="btn btn-add" onclick="adicionarDisciplina()">Adicionar Disciplina</button>
-    <button class="btn btn-send" onclick="enviarFormulario()">Enviar</button>
-
-<hr style="margin-top: 20px;">
-
-<!-- Botão de Consultar Agendamento -->
-<button class="btn" onclick="abrirConsulta()">Consultar Agendamento</button>
-
-<!-- Popup de Consulta -->
-<div id="popupConsulta" class="popup hidden">
-  <div class="popup-content">
-    <h3>Consultar Agendamento</h3>
-    <label for="raConsulta">Digite seu RA:</label>
-    <input type="text" inputmode="numeric" pattern="[0-9]*" id="raConsulta" placeholder="Ex: 1234567" required />
-
-    <div class="popup-buttons">
-      <button class="btn" onclick="consultarAgendamento()">Consultar</button>
-      <button class="btn btn-close" onclick="fecharConsulta()">Fechar</button>
-    </div>
-    <div id="resultadoConsulta"></div>
-  </div>
-</div>
-
-    <div class="credits">© 2025 - Desenvolvido por Thiago Nascimento</div>
-  </div>
-
-  <div class="overlay" id="overlay"></div>
-  <div class="summary-popup" id="resumoPopup">
-    <h3>Agendamento Confirmado</h3>
-    <div id="resumoConteudo"></div>
-    <button class="btn btn-send" style="margin-top:15px;" onclick="fecharResumo()">Fechar</button>
-  </div>
-
-  <div class="loading-overlay" id="loadingOverlay">
-
-<div id="resumoConsulta" class="resumo-popup" style="display: none;">
-  <div class="resumo-content">
-    <h2>Agendamento Encontrado</h2>
-    <p><strong>Nome:</strong> <span id="consulta-nome"></span></p>
-    <p><strong>RA:</strong> <span id="consulta-ra"></span></p>
-    <p><strong>Curso:</strong> <span id="consulta-curso"></span></p>
-    <p><strong>Data de envio:</strong> <span id="consulta-data"></span></p>
-    <ul id="consulta-disciplinas"></ul>
-    <button class="btn btn-fechar" onclick="fecharResumoConsulta()">Fechar</button>
-  </div>
-</div>
-
-    <div class="loading">Enviando...<br><span id="loadingPercentage">0%</span></div>
-    <div class="progress-bar">
-      <div class="progress" id="progress"></div>
-    </div>
-  </div>
-
-    <!-- POPUP INICIAL REGULAR x SUBSTITUTIVA -->
-  <div id="popup-inicial" class="popup-overlay">
-    <div class="popup-modal">
-      <h2>Tipo de Semana</h2>
-      <p id="popup-mensagem">
-        Confirme para qual semana é este agendamento:
-      </p>
-
-      <div id="popup-botoes" class="popup-buttons">
-        <button id="btn-regular" class="btn btn-regular">
-          Semana REGULAR
-        </button>
-        <button id="btn-substitutiva" class="btn btn-substitutiva">
-          Semana SUBSTITUTIVA
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script src="assets/js/script.js"></script>
 </body>
 </html>
-
-  
-  <script src="assets/js/script.js"></script>
-</body>
-</html>
-
-
-
-
