@@ -285,7 +285,7 @@ window.addEventListener("load", () => {
   // SUBSTITUTIVA → redireciona para o site da SUBSTITUTIVA
   btnSubstitutiva?.addEventListener("click", () => {
     document.body.classList.remove("bloqueado");
-    window.location.href = URL_SUBSTITUTIVA;
+    window.location.href = https://pimdireto.github.io/AgendamentoSubstitutivaUNIPBC/;
   });
 });
 
@@ -300,6 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // aqui você pode chamar outras funções, ex:
   // carregarHorariosLotadosRegular();
 });
+
 
 
 
