@@ -401,3 +401,16 @@ body.bloqueado {
   background-color: #f0ad4e;
   color: #fff;
 }
+
+// ===================== FUNÇÕES DO POPUP – SITE REGULAR =====================
+
+function confirmarRegular() {
+  const popup = document.getElementById("popup-inicial");
+  if (popup) {
+    popup.style.display = "none";
+  }
+}
+
+function irParaSubstitutiva() {
+  window.location.href = "https://pimdireto.github.io/AgendamentoSubstitutivaUNIPBC/";
+}
