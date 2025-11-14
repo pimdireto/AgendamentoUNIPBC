@@ -260,5 +260,40 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 
+// ===================== POPUP REGULAR x SUBSTITUTIVA (SITE DA REGULAR) =====================
+
+// Mostrar o popup logo após a página carregar
+window.addEventListener("load", () => {
+  const popup = document.getElementById("popup-inicial");
+  if (!popup) return;
+
+  // mostra o popup e bloqueia interações
+  popup.style.display = "flex";
+
+  const btnRegular = document.getElementById("btn-regular");
+  const btnSubstitutiva = document.getElementById("btn-substitutiva");
+
+  // URL do outro site (SUBSTITUTIVA)
+  const URL_SUBSTITUTIVA = "https://pimdireto.github.io/AgendamentoSubstitutivaUNIPBC/"; // ajuste se o link for outro
+
+  // REGULAR → fica nesta página, só destrava o formulário
+  btnRegular?.addEventListener("click", () => {
+    document.body.classList.remove("bloqueado");
+    popup.style.display = "none";
+  });
+
+  // SUBSTITUTIVA → vai para o site da SUBSTITUTIVA
+  btnSubstitutiva?.addEventListener("click", () => {
+    document.body.classList.remove("bloqueado");
+    window.location.href = URL_SUBSTITUTIVA;
+  });
+});
+
+// Carregamentos secundários (se tiver)
+document.addEventListener("DOMContentLoaded", () => {
+  // aqui você pode chamar outras funções, ex:
+  // carregarHorariosLotadosRegular();
+});
+
 
 
