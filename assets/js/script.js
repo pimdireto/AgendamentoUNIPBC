@@ -29,7 +29,9 @@ function gerarOpcoesHorarios() {
     "28/11 Sexta-feira - Manhã", "28/11 Sexta-feira - Tarde", "28/11 Sexta-feira - noite",
     "29/11 Sábado - Manhã", "29/11 Sábado  - Tarde"
   ];
-  return horarios.map(h => `<div class="schedule-option" onclick="selecionarHorario(this)">${h}</div>`).join("");
+  return horarios
+    .map(h => `<div class="schedule-option" onclick="selecionarHorario(this)">${h}</div>`)
+    .join("");
 }
 
 function toggleGrade(btn) {
@@ -93,11 +95,12 @@ function enviarFormulario() {
     }
   }, 100);
 
-  const URL_API = "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec";
+  const URL_API =
+    "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       if (data && data.ra && data.nome) {
         clearInterval(interval);
         document.getElementById("loadingOverlay").style.display = "none";
@@ -146,7 +149,7 @@ function enviarFormulario() {
             <p><strong>Data de envio:</strong> ${new Date().toLocaleString()}</p>
             <ul>
           `;
-          agendamentos.forEach(item => {
+          agendamentos.forEach((item) => {
             resumo += `<li><strong>${item.disciplina}:</strong> ${item.horario}</li>`;
           });
           resumo += `</ul>`;
@@ -157,7 +160,7 @@ function enviarFormulario() {
         }, 500);
       });
     })
-    .catch(error => {
+    .catch((error) => {
       clearInterval(interval);
       document.getElementById("loadingOverlay").style.display = "none";
       alert("Erro ao verificar RA: " + error.message);
@@ -188,11 +191,12 @@ function consultarAgendamento() {
   }
 
   document.getElementById("loadingOverlay").style.display = "flex";
-  const URL_API = "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec";
+  const URL_API =
+    "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec";
 
   fetch(`${URL_API}?ra=${ra}`)
-    .then(res => res.json())
-    .then(data => {
+    .then((res) => res.json())
+    .then((data) => {
       document.getElementById("loadingOverlay").style.display = "none";
       if (!data || !data.nome) {
         alert("Agendamento não encontrado.");
@@ -206,7 +210,7 @@ function consultarAgendamento() {
         <p><strong>Data de envio:</strong> ${data.dataEnvio}</p>
         <ul>
       `;
-      data.disciplinas.forEach(item => {
+      data.disciplinas.forEach((item) => {
         resumo += `<li><strong>${item.nome}:</strong> ${item.horario}</li>`;
       });
       resumo += `</ul>`;
@@ -215,38 +219,40 @@ function consultarAgendamento() {
       document.getElementById("overlay").style.display = "block";
       document.getElementById("resumoPopup").style.display = "block";
     })
-    .catch(error => {
+    .catch((error) => {
       document.getElementById("loadingOverlay").style.display = "none";
       alert("Erro na consulta: " + error.message);
     });
 }
 
 function mostrarResumoConsulta(dados) {
-  document.getElementById('consulta-nome').innerText = dados.nome || '---';
-  document.getElementById('consulta-ra').innerText = dados.ra || '---';
-  document.getElementById('consulta-curso').innerText = dados.curso || '---';
-  document.getElementById('consulta-data').innerText = dados.dataEnvio || '---';
+  document.getElementById("consulta-nome").innerText = dados.nome || "---";
+  document.getElementById("consulta-ra").innerText = dados.ra || "---";
+  document.getElementById("consulta-curso").innerText = dados.curso || "---";
+  document.getElementById("consulta-data").innerText = dados.dataEnvio || "---";
 
-  const lista = document.getElementById('consulta-disciplinas');
+  const lista = document.getElementById("consulta-disciplinas");
   lista.innerHTML = "";
-  dados.disciplinas.forEach(d => {
+  dados.disciplinas.forEach((d) => {
     const item = document.createElement("li");
     item.textContent = `${d.nome}: ${d.horario}`;
     lista.appendChild(item);
   });
 
-  document.getElementById('resumoConsulta').style.display = 'block';
+  document.getElementById("resumoConsulta").style.display = "block";
 }
 
 function fecharResumoConsulta() {
-  document.getElementById('resumoConsulta').style.display = 'none';
+  document.getElementById("resumoConsulta").style.display = "none";
 }
 
 let horariosLotados = {};
 
 async function carregarHorariosLotados() {
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec");
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbzMNpbx2XJ1_myToc-r7h8DP4zYHesni2wsTZJKNckHlHv9NSv2WcuxwiiKfsamKlTqRg/exec"
+    );
     const data = await response.json();
     horariosLotados = data;
   } catch (error) {
@@ -254,54 +260,23 @@ async function carregarHorariosLotados() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await carregarHorariosLotados();
-  // Se houver função para criar grade, chame aqui
+// carregar horários em segundo plano
+document.addEventListener("DOMContentLoaded", () => {
+  carregarHorariosLotados();
 });
 
 
-// ===================== POPUP REGULAR x SUBSTITUTIVA (SITE DA REGULAR) =====================
+// ===================== FUNÇÕES DO POPUP – SITE REGULAR =====================
 
-// Mostrar o popup logo após a página carregar
-window.addEventListener("load", () => {
+// REGULAR → fica nesta página (só fecha o popup)
+function confirmarRegular() {
   const popup = document.getElementById("popup-inicial");
-  if (!popup) return;
-
-  // Mostra o popup e mantém o body bloqueado
-  popup.style.display = "flex";
-
-  const btnRegular = document.getElementById("btn-regular");
-  const btnSubstitutiva = document.getElementById("btn-substitutiva");
-
-  // URL do site da SUBSTITUTIVA
-  const URL_SUBSTITUTIVA = "https://pimdireto.github.io/AgendamentoSubstitutivaUNIPBC/";
-
-  // REGULAR → fica nesta página, só destrava o formulário
-  btnRegular?.addEventListener("click", () => {
-    document.body.classList.remove("bloqueado");
+  if (popup) {
     popup.style.display = "none";
-  });
+  }
+}
 
-  // SUBSTITUTIVA → redireciona para o site da SUBSTITUTIVA
-  btnSubstitutiva?.addEventListener("click", () => {
-    document.body.classList.remove("bloqueado");
-    window.location.href = https://pimdireto.github.io/AgendamentoSubstitutivaUNIPBC/;
-  });
-});
-
-// Carregamentos secundários (se precisar)
-document.addEventListener("DOMContentLoaded", () => {
-  // Exemplo:
-  // carregarHorariosLotadosRegular();
-});
-
-// Carregamentos secundários (se tiver)
-document.addEventListener("DOMContentLoaded", () => {
-  // aqui você pode chamar outras funções, ex:
-  // carregarHorariosLotadosRegular();
-});
-
-
-
-
-
+// SUBSTITUTIVA → vai para o site da SUBSTITUTIVA
+function irParaSubstitutiva() {
+  window.location.href = "https://pimdireto.github.io/AgendamentoSubstitutivaUNIPBC/";
+}
